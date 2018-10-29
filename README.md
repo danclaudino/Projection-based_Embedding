@@ -57,7 +57,6 @@ Psi4 does not currently have a functionality that allows the user to provide a w
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`            }`  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`        }`  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`        fclose(input);`  
-  
 `    }`  
 `    Fa_->add(Va_emb);`  
 `    Fa_->add(Ga_);`  

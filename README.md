@@ -1,6 +1,6 @@
-# Projection-based Embedding with SVD orbitals
+# Projection-based Embedding with SPADE orbitals
 
-Python script and modules to run projection-based embedding calculations using SVD orbitals
+Python script and modules to run projection-based embedding calculations using SPADE orbitals
 
 ## Requirements
 
@@ -17,8 +17,8 @@ Psi4 does not currently have a functionality that allows the user to provide a w
 1. Open `top-level-psi4-dir/psi4/src/psi4/libscf_solver/hf.cc` 
 2. Find the `form_H()` function
 3. Add the following  to the end of `form_H()`:
-`    if (std::ifstream("newH.dat"))  `
-`    {  `
+`    if (std::ifstream("newH.dat"))  `  
+`    {  `  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`        outfile->Printf( " ===> Reading embedded core Hamiltonian <=== \n\n");  `
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`        int nso = 0;  `
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`        for(int h=0; h < nirrep_; h++) nso += nsopi_[h];`

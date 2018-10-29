@@ -1,6 +1,6 @@
 # Projection-based Embedding with SPADE orbitals
 
-Python script and modules to run projection-based embedding calculations using SPADE orbitals
+Python scripts and modules to run projection-based embedding calculations using SPADE orbitals
 
 ## Requirements
 

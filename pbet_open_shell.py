@@ -2,7 +2,7 @@
     Daniel Claudino - October/2018
 
     Module to run a projection-based embedding 
-    calculation with a open-shell (HF/KS) reference.
+    calculation with an open-shell (HF/KS) reference.
 
 """
 import os

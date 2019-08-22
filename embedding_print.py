@@ -1,17 +1,5 @@
 import numpy as np
 
-def matrix_dot(A, B):
-    """ Computes the trace (dot product) of matrices A and B
-
-    Args:
-        A, B (numpy.array): matrices to compute tr(A*B)
-
-    Returns:
-        The trace (dot product) of A * B
-    """
-
-    return np.einsum('ij,ij', A, B) 
-
 def print_sigma(sigma, n, outfile):
     """ Formats the printing of singular values for the PRIME shells.
 
@@ -50,27 +38,33 @@ def banner(outfile, partition_method):
         outfile.write('     J. Chem. Theory Comput. 2019, 15, 1053.\n')
 
 
-def print_rhf(wfn, n_act_mos, E_A, E_B, G, nre, embed_E_A, density_correction, embed_SCF, overlap, outfile):
+def print_rhf(wfn, n_act_mos, E_A, E_B, G, nre, embed_E_A, correction, overlap, outfile):
 
+    all_else = E_B + G + nre
     outfile.write('\n')
-    outfile.write('Number of orbitals in A: %s\n' % n_act_mos)
-    outfile.write('Number of orbitals in B: %s\n' % (wfn.nalpha() - n_act_mos))
+    outfile.write(' Number of orbitals in A: %s\n' % n_act_mos)
+    outfile.write(' Number of orbitals in B: %s\n' % (wfn.nalpha() - n_act_mos))
     outfile.write('\n')
-    outfile.write('{:<7} {:<6} \t\t\t = {:>16.10f}\n'.format('('+wfn.functional().name()+')', 'E[A]', E_A))
-    outfile.write('{:<7} {:<6} \t\t\t = {:>16.10f}\n'.format('('+wfn.functional().name()+')', 'E[B]', E_B))
-    outfile.write('Intersystem interaction G \t = {:>16.10f}\n'.format(G))
-    outfile.write('Nuclear repulsion energy \t = {:>16.10f}\n'.format(nre))
-    outfile.write('{:<7} {:<6} \t\t\t = {:>16.10f}\n'.format('('+wfn.functional().name()+')', 'E[A+B]', E_A + E_B + G + nre))
+    outfile.write(' --- Before embedding --- \n')
+    outfile.write(' {:<7} {:<6} \t\t = {:>16.10f}\n'.format('('+wfn.functional().name()+')', 'E[A]', E_A))
+    outfile.write(' {:<7} {:<6} \t\t = {:>16.10f}\n'.format('('+wfn.functional().name()+')', 'E[B]', E_B))
+    outfile.write(' Intersystem interaction G \t = {:>16.10f}\n'.format(G))
+    outfile.write(' Nuclear repulsion energy \t = {:>16.10f}\n'.format(nre))
+    outfile.write(' {:<7} {:<6} \t\t = {:>16.10f}\n'.format('('+wfn.functional().name()+')', 'E[A+B]', E_A + all_else))
     outfile.write('\n')
-    outfile.write('Embedded SCF E[A] \t\t = {:>16.10f}\n'.format(embed_E_A))
-    outfile.write('Embedded density correction \t = {:>16.10f}\n'.format(density_correction))
-    outfile.write('Embedded HF-in-{:<5} E[A] \t = {:>16.10f}\n'.format(wfn.functional().name(), embed_SCF))
-    outfile.write('<SD_before|SD_after> \t\t = {:>16.10f}\n'.format(abs(overlap)))
+    
+    outfile.write(' --- After embedding --- \n')
+    outfile.write(' Embedded SCF E[A] \t\t = {:>16.10f}\n'.format(embed_E_A))
+    outfile.write(' Embedded density correction \t = {:>16.10f}\n'.format(correction))
+
+    outfile.write(' Embedded HF-in-{:<5} E[A] \t = {:>16.10f}\n'.format(wfn.functional().name(), embed_E_A + all_else + correction))
+    outfile.write(' <SD_before|SD_after> \t\t = {:>16.10f}\n'.format(abs(overlap)))
     outfile.write('\n')
 
 
-def print_uhf(wfn, n_act_alpha, n_act_beta, E_A, E_B, G, nre, embed_E_A, density_correction, embed_SCF, overlap, outfile):
+def print_uhf(wfn, n_act_alpha, n_act_beta, E_A, E_B, G, nre, embed_E_A, correction, overlap, outfile):
 
+    all_else = E_B + G + nre
     outfile.write('\n')
     outfile.write('Number of alpha orbitals in A: %s\n' % n_act_alpha)
     outfile.write('Number of beta orbitals in A: %s\n' % n_act_beta)
@@ -81,11 +75,11 @@ def print_uhf(wfn, n_act_alpha, n_act_beta, E_A, E_B, G, nre, embed_E_A, density
     outfile.write('{:<7} {:<6} \t\t\t = {:>16.10f}\n'.format('('+wfn.functional().name()+')', 'E[B]', E_B))
     outfile.write('Intersystem interaction G \t = {:>16.10f}\n'.format(G))
     outfile.write('Nuclear repulsion energy \t = {:>16.10f}\n'.format(nre))
-    outfile.write('{:<7} {:<6} \t\t\t = {:>16.10f}\n'.format('('+wfn.functional().name()+')', 'E[A+B]', E_A + E_B + G + nre))
+    outfile.write('{:<7} {:<6} \t\t\t = {:>16.10f}\n'.format('('+wfn.functional().name()+')', 'E[A+B]', E_A + all_else))
     outfile.write('\n')
     outfile.write('Embedded SCF E[A] \t\t = {:>16.10f}\n'.format(embed_E_A))
-    outfile.write('Embedded density correction \t = {:>16.10f}\n'.format(density_correction))
-    outfile.write('Embedded HF-in-{:<5} E[A] \t = {:>16.10f}\n'.format(wfn.functional().name(), embed_SCF))
+    outfile.write('Embedded density correction \t = {:>16.10f}\n'.format(correction))
+    outfile.write('Embedded HF-in-{:<5} E[A] \t = {:>16.10f}\n'.format(wfn.functional().name(), embed_E_A + all_else + correction))
     outfile.write('<SD_before|SD_after> \t\t = {:>16.10f}\n'.format(abs(overlap/2.0)))
     outfile.write('\n')
 

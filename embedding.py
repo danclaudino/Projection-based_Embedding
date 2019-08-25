@@ -110,33 +110,34 @@ class Psi4Embed:
             jk.C_clear()
             jk.finalize()
             K = jk.K()[0].np
-            return K
+            if operator_name == K:
+                return K
+            else:
+                K_orb = 0.06*self.wfn.Fa().np - K 
+                return K_orb
 
-        if operator_name == 'V':
+        elif operator_name == 'V':
             mints = psi4.core.MintsHelper(self.wfn.basisset())
             V = mints.ao_potential().np
             return V
 
-        if operator_name == 'T':
+        elif operator_name == 'T':
             mints = psi4.core.MintsHelper(self.wfn.basisset())
             T = mints.ao_kinetic().np
             return T
 
-        if operator_name == 'H':
+        elif operator_name == 'H':
             H = self.wfn.H().np
             return H
 
-        if operator_name == 'S':
+        elif operator_name == 'S':
             S = self.wfn.S().np
             return S
 
-        if operator_name == 'F':
+        elif operator_name == 'F':
             F = self.wfn.Fa().np
             return F
 
-        if operator_name == 'K_orb':
-            K_orb = 0.06*self.wfn.Fa().np - K 
-            return K_orb 
 
     def pseudocanonical(self, C):
         """Returns pseudocanonical orbitals and the corresponding eigenvalues.
@@ -296,7 +297,7 @@ class Psi4Embed:
         Ka = jk.K()[0].np
         Kb = jk.K()[1].np
         
-        if hasattr(self.wfn, 'functional'): # only False for MOPAC
+        if hasattr(self.wfn, 'functional'): 
             # V_ks only if SCF is not HF
             if(self.wfn.functional().name() != 'HF'):
                 self.wfn.Da().copy(psi4.core.Matrix.from_array(Da))
@@ -346,8 +347,10 @@ class Psi4Embed:
         orbs = psi4.core.Matrix.from_array(C)
 
         # J and K
-        jk = psi4.core.JK.build(self.wfn.basisset())
-        #jk = psi4.core.JK.build(self.wfn.basisset(),self.wfn.get_basisset("DF_BASIS_SCF"),"DF")
+        if hasattr(self.wfn, 'get_basisset'):
+            jk = psi4.core.JK.build(self.wfn.basisset(),self.wfn.get_basisset("DF_BASIS_SCF"),"DF")
+        else:
+            jk = psi4.core.JK.build(self.wfn.basisset())
         jk.set_memory(int(1.25e9))
         jk.initialize()
         jk.C_left_add(orbs)
@@ -358,7 +361,7 @@ class Psi4Embed:
         J = jk.J()[0].np
         K = jk.K()[0].np
 
-        if hasattr(self.wfn, 'functional'): # only False for MOPAC
+        if hasattr(self.wfn, 'functional'): 
             # V_ks only if SCF is not HF
             if(self.wfn.functional().name() != 'HF'):
                 self.wfn.Da().copy(psi4.core.Matrix.from_array(D))

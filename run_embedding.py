@@ -17,7 +17,12 @@ def psi4_closed_shell(options):
     mol = psi4.geometry(options['geometry'])
     psi4.core.be_quiet()
     psi4.core.set_output_file('output.dat', True)
-    psi4.set_options({"save_jk": "true", 'basis': options['basis']})
+    psi4.set_options({"save_jk": "true", 
+                     'basis': options['basis'],
+                     'ints_tolerance': 1e-10,
+                     'e_convergence':1e-6, 
+                     'd_convergence':1e-6, \
+                     'r_convergence':1e-6})
     eng, wfn = psi4.energy(options['low_level'], return_wfn=True)
 
     # File to print the embedding info
@@ -32,9 +37,7 @@ def psi4_closed_shell(options):
         E_xc_total = 0.0
         V_total = np.zeros([wfn.nso(), wfn.nso()])
 
-    # Creating an instance of the Embed class
     embed = Psi4Embed(wfn, mol, options['n_active_atoms'], options['projection_basis'])
-
     n_act_aos = embed.count_active_aos()
 
     # Whether or not to project occupied orbitals onto another (minimal) basis
@@ -139,7 +142,7 @@ def psi4_closed_shell(options):
 
     # --------------------------------- Post embedded HF calculation ---------------------------------------
 
-    # No truncation of the virtual space (CL orbitals)
+    # No truncation of the virtual space (no CL orbitals)
     if isinstance(options['n_virtual_shell'], str) or options['n_virtual_shell'] == None:
         emb_e, emb_wfn = psi4.energy(options['high_level'], ref_wfn=scf_wfn, return_wfn=True)
         corr = psi4.core.get_variable("CURRENT CORRELATION ENERGY")
@@ -199,6 +202,7 @@ def psi4_closed_shell(options):
 
         # Checking the maximum number of shells
         max_shell = int((nbf-wfn.nalpha())/shell_size)-1
+        n_virtual_shell = options['n_virtual_shell']
         if options['n_virtual_shell'] > int((nbf-n_act_mos)/shell_size):
             n_virtual_shell = max_shell
         elif (nbf-wfn.nalpha()) % shell_size == 0:
@@ -232,7 +236,7 @@ def psi4_closed_shell(options):
 
             outfile.write(' {}-in-{} energy of shell # {} with {} orbitals = {:^12.10f}\n'\
             .format(options['high_level'].upper(), wfn.functional().name(), ishell,\
-            shell_size*(ishell+1), embed_SCF + e_corr[ishell]))
+            shell_size*(ishell+1), embed_SCF + e_corr_shell[ishell]))
 
         if n_virtual_shell == max_shell:
 
@@ -240,7 +244,7 @@ def psi4_closed_shell(options):
             eps_span, C_pseudo_span = embed.pseudocanonical(C_span)
             e_corr = embed.energy(eps_span, C_pseudo_span, len(eps_span), options['high_level'], n_env_mos)
             e_corr_shell.append(e_corr)
-            outfile.write(' Energy of all ({}) orbitals = {:^12.10f}\n'.format(C_span.shape[1], embed_SCF + e_corr[-1]))
+            outfile.write(' Energy of all ({}) orbitals = {:^12.10f}\n'.format(C_span.shape[1], embed_SCF + e_corr_shell[-1]))
 
 
     # --------------------------------------- More printing  ----------------------------------------------
